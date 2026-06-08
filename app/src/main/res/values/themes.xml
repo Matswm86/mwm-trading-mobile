@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base theme is a no-action-bar Material theme; Compose drives the rest. -->
+    <style name="Theme.MwmBacktest" parent="android:Theme.Material.NoActionBar" />
+</resources>
