@@ -19,12 +19,16 @@ object NetworkModule {
         coerceInputValues = true
         isLenient = true
         explicitNulls = false
+        // REQUIRED: without this, default-valued request fields (notably
+        // SubmitJobRequest.job_type = "backtest") are omitted from the body and
+        // the server rejects it with HTTP 400 "unsupported job_type ''".
+        encodeDefaults = true
     }
 
     private val client: OkHttpClient by lazy {
         val logging = HttpLoggingInterceptor().apply {
             level = if (BuildConfig.DEBUG) {
-                HttpLoggingInterceptor.Level.BASIC
+                HttpLoggingInterceptor.Level.BODY // full request/response in debug logcat
             } else {
                 HttpLoggingInterceptor.Level.NONE
             }
