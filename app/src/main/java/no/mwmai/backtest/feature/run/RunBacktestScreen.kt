@@ -59,13 +59,6 @@ fun RunBacktestScreen(
         }
     }
 
-    if (s.needsCredentials) {
-        CredentialsDialog(
-            onSave = viewModel::saveCredentials,
-            onDismiss = viewModel::dismissCredentials,
-        )
-    }
-
     Scaffold(
         topBar = {
             TopAppBar(

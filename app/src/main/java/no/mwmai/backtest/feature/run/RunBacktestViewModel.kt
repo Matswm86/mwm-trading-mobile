@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import no.mwmai.backtest.data.CredentialStore
 import no.mwmai.backtest.data.model.CellSpec
 import no.mwmai.backtest.data.model.DataRange
 import no.mwmai.backtest.data.model.JobConfig
@@ -45,7 +44,6 @@ data class RunUiState(
     val submitting: Boolean = false,
     // Set when the job is queued: navigate to results/{jobId}.
     val submittedJobId: Int? = null,
-    val needsCredentials: Boolean = false,
 ) {
     val availableTimeframes: List<String> get() = selectedStrategy?.timeframes ?: emptyList()
     val canSubmit: Boolean
@@ -56,7 +54,6 @@ data class RunUiState(
 class RunBacktestViewModel(app: Application) : AndroidViewModel(app) {
 
     private val repo = PlatformRepository()
-    private val creds = CredentialStore.get(app)
     private val isoFmt = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
 
     private val _state = MutableStateFlow(RunUiState())
@@ -116,11 +113,6 @@ class RunBacktestViewModel(app: Application) : AndroidViewModel(app) {
         val tf = s.timeframe ?: return
         val sym = s.instrument ?: return
         val range = s.dataRange?.takeIf { it.hasData } ?: return
-        val auth = creds.authHeader()
-        if (auth == null) {
-            _state.update { it.copy(needsCredentials = true) }
-            return
-        }
         val (start, end) = resolveWindow(range, s.window)
         val body = SubmitJobRequest(
             config = JobConfig(
@@ -136,7 +128,7 @@ class RunBacktestViewModel(app: Application) : AndroidViewModel(app) {
         )
         viewModelScope.launch {
             _state.update { it.copy(submitting = true, error = null) }
-            repo.submitJob(auth, body)
+            repo.submitJob(body)
                 .onSuccess { resp ->
                     enqueuePoll(resp.jobId, "${strat.label} · $sym $tf")
                     _state.update { it.copy(submitting = false, submittedJobId = resp.jobId) }
@@ -144,13 +136,6 @@ class RunBacktestViewModel(app: Application) : AndroidViewModel(app) {
                 .onFailure { e -> _state.update { it.copy(submitting = false, error = e.message) } }
         }
     }
-
-    fun saveCredentials(user: String, pass: String) {
-        creds.save(user, pass)
-        _state.update { it.copy(needsCredentials = false) }
-    }
-
-    fun dismissCredentials() = _state.update { it.copy(needsCredentials = false) }
 
     fun consumeNavigation() = _state.update { it.copy(submittedJobId = null) }
 

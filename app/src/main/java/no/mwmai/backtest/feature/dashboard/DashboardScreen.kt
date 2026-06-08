@@ -41,7 +41,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import no.mwmai.backtest.data.model.AccountDto
 import no.mwmai.backtest.data.model.CellDto
 import no.mwmai.backtest.ui.theme.Muted
 import no.mwmai.backtest.ui.theme.Negative
@@ -91,23 +90,19 @@ fun DashboardScreen(
                         TextButton(onClick = viewModel::load) { Text("Retry") }
                     }
                 }
-                is DashboardUiState.Ready -> DashboardList(s.accounts, s.cells)
+                is DashboardUiState.Ready -> DashboardList(s.cells)
             }
         }
     }
 }
 
 @Composable
-private fun DashboardList(accounts: List<AccountDto>, cells: List<CellDto>) {
+private fun DashboardList(cells: List<CellDto>) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(12.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        if (accounts.isNotEmpty()) {
-            item { SectionLabel("Accounts") }
-            items(accounts, key = { it.id }) { AccountCard(it) }
-        }
         item { SectionLabel("Cells (${cells.size})") }
         items(cells, key = { it.name }) { CellCard(it) }
     }
@@ -121,34 +116,6 @@ private fun SectionLabel(text: String) {
         color = Muted,
         modifier = Modifier.padding(start = 4.dp, top = 6.dp, bottom = 2.dp),
     )
-}
-
-@Composable
-private fun AccountCard(a: AccountDto) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(14.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column {
-                Text(a.label, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
-                Text(a.kind, style = MaterialTheme.typography.bodySmall, color = Muted)
-            }
-            Text(
-                text = a.money ?: a.balance?.let { money(it) } ?: "—",
-                fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.Monospace,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-        }
-    }
 }
 
 @Composable

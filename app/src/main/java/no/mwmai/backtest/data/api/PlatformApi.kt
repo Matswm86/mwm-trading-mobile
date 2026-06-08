@@ -11,7 +11,6 @@ import no.mwmai.backtest.data.model.SubmitJobRequest
 import no.mwmai.backtest.data.model.SubmitJobResponse
 import retrofit2.http.Body
 import retrofit2.http.GET
-import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -38,11 +37,9 @@ interface PlatformApi {
         @Query("timeframe") timeframe: String,
     ): DataRange
 
+    // Unauthenticated: POST /api/jobs is compute-only and exempt from auth.
     @POST("api/jobs")
-    suspend fun submitJob(
-        @Header("Authorization") authorization: String,
-        @Body body: SubmitJobRequest,
-    ): SubmitJobResponse
+    suspend fun submitJob(@Body body: SubmitJobRequest): SubmitJobResponse
 
     @GET("api/jobs/{id}")
     suspend fun job(@Path("id") id: Int): JobEnvelope

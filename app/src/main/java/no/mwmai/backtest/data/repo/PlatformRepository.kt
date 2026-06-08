@@ -29,10 +29,8 @@ class PlatformRepository(
         api.dataRange(symbol, timeframe)
     }
 
-    suspend fun submitJob(
-        authorization: String,
-        body: SubmitJobRequest,
-    ): Result<SubmitJobResponse> = io { api.submitJob(authorization, body) }
+    suspend fun submitJob(body: SubmitJobRequest): Result<SubmitJobResponse> =
+        io { api.submitJob(body) }
 
     suspend fun job(id: Int): Result<JobDto> = io { api.job(id).job }
 

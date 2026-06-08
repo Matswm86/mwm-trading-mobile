@@ -5,11 +5,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -19,7 +17,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import kotlinx.serialization.json.JsonElement
 import no.mwmai.backtest.data.model.ParamSpec
@@ -86,42 +83,3 @@ private fun ParamRow(p: ParamSpec) {
 
 private fun renderDefault(e: JsonElement?): String =
     e?.toString()?.removeSurrounding("\"") ?: "—"
-
-@Composable
-fun CredentialsDialog(onSave: (String, String) -> Unit, onDismiss: () -> Unit) {
-    var user by remember { mutableStateOf("") }
-    var pass by remember { mutableStateOf("") }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Platform credentials") },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text(
-                    "Queuing a backtest needs the platform basic-auth login. Stored encrypted on-device.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Muted,
-                )
-                OutlinedTextField(
-                    value = user,
-                    onValueChange = { user = it },
-                    label = { Text("Username") },
-                    singleLine = true,
-                )
-                OutlinedTextField(
-                    value = pass,
-                    onValueChange = { pass = it },
-                    label = { Text("Password") },
-                    singleLine = true,
-                    visualTransformation = PasswordVisualTransformation(),
-                )
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = { onSave(user.trim(), pass) },
-                enabled = user.isNotBlank() && pass.isNotBlank(),
-            ) { Text("Save & run") }
-        },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
-    )
-}
