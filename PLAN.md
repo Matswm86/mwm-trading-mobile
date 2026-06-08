@@ -75,8 +75,14 @@ CI mirrors this: every push runs `.github/workflows/build-android.yml` → artif
 
 1. ✅ **v1 Dashboard** — `/api/observability` → accounts + cell cards (PF / net /
    maxDD / win / ironclad / live-health dot), pull-to-refresh.
-2. Cell detail + equity-curve chart (Vico) + validation panel (DSR / Lo-Sharpe).
-3. Run-a-backtest: param form → `POST /api/jobs` (Basic Auth, stored creds) →
-   WorkManager poll → local notification → results.
-4. Variant explorer: load cell YAML, tweak stop/TP/fill_mode, validate, submit.
-5. Settings: API base URL + basic-auth credentials (EncryptedSharedPreferences).
+2. ✅ **Run-a-backtest** — strategy (picker) → timeframe (constrained) → instrument
+   (MNQ/MGC/MES/BTC) → contracts → window (bounded by `data_range`) → `POST /api/jobs`
+   (basic-auth, EncryptedSharedPreferences) → WorkManager poll → local notification →
+   results screen (Canvas equity curve + net/gross/fees/trades/win/maxDD).
+   **Caveat**: per-param tuning (q, lookback, stop_frac…) is shown read-only because
+   the worker's ad-hoc path honours only strategy/symbol/timeframe/contracts. Real
+   tuning needs `build_ephemeral_cell` + the job handler to accept a `params` override.
+3. Cell detail screen (tap a dashboard cell → its archived equity curve + validation).
+4. Per-param overrides: plumb `cell_spec.params` through worker → make screen-2 params
+   editable. (Backend change to mwmt_platform.)
+5. Variant explorer (load cell YAML, tweak, validate, submit) + full Settings screen.
