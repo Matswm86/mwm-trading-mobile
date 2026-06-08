@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
@@ -80,7 +81,7 @@ fun ResultsScreen(
                     )
                 }
                 is ResultsUiState.Failed -> Text(st.message, color = Negative, modifier = Modifier.padding(24.dp))
-                is ResultsUiState.Ready -> ResultBody(st.run)
+                is ResultsUiState.Ready -> ResultBody(st.run, st.stats)
             }
         }
     }
@@ -88,9 +89,12 @@ fun ResultsScreen(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun ResultBody(run: RunDto) {
+private fun ResultBody(run: RunDto, stats: no.mwmai.backtest.data.model.RunStats?) {
     Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(androidx.compose.foundation.rememberScrollState())
+            .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         Text(
@@ -113,6 +117,12 @@ private fun ResultBody(run: RunDto) {
             Tile("MAX DD", money(-maxDrawdown(run.equityCurve)), Negative)
             Tile("GROSS", money(run.grossPnl))
             Tile("FEES", money(run.commissions?.let { -abs(it) }))
+        }
+
+        if (stats == null) {
+            Text("Loading stats…", color = Muted, style = MaterialTheme.typography.bodySmall)
+        } else {
+            StatsSections(stats)
         }
     }
 }
@@ -140,7 +150,8 @@ private fun pnlColor(v: Double?): Color? = when {
 
 private fun maxDrawdown(curve: List<Double>): Double {
     if (curve.isEmpty()) return 0.0
-    var peak = curve.first()
+    // Baseline 0.0 (flat before trade 1) so an opening drawdown is counted.
+    var peak = 0.0
     var mdd = 0.0
     for (v in curve) {
         if (v > peak) peak = v

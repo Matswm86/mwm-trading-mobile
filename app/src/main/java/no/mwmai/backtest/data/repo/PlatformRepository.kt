@@ -10,6 +10,7 @@ import no.mwmai.backtest.data.model.ObservabilityResponse
 import no.mwmai.backtest.data.model.ParamSpecResponse
 import no.mwmai.backtest.data.model.PickerStrategy
 import no.mwmai.backtest.data.model.RunDto
+import no.mwmai.backtest.data.model.RunStats
 import no.mwmai.backtest.data.model.SubmitJobRequest
 import no.mwmai.backtest.data.model.SubmitJobResponse
 
@@ -36,6 +37,8 @@ class PlatformRepository(
     suspend fun job(id: Int): Result<JobDto> = io { api.job(id).job }
 
     suspend fun run(id: String): Result<RunDto> = io { api.run(id).run }
+
+    suspend fun runStats(id: String): Result<RunStats> = io { api.runStats(id) }
 
     private suspend fun <T> io(block: suspend () -> T): Result<T> =
         withContext(Dispatchers.IO) { runCatching { block() } }

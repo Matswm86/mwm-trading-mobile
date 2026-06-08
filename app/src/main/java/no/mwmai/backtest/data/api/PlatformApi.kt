@@ -6,6 +6,7 @@ import no.mwmai.backtest.data.model.ObservabilityResponse
 import no.mwmai.backtest.data.model.ParamSpecResponse
 import no.mwmai.backtest.data.model.PickerResponse
 import no.mwmai.backtest.data.model.RunEnvelope
+import no.mwmai.backtest.data.model.RunStats
 import no.mwmai.backtest.data.model.SubmitJobRequest
 import no.mwmai.backtest.data.model.SubmitJobResponse
 import retrofit2.http.Body
@@ -48,4 +49,10 @@ interface PlatformApi {
 
     @GET("api/runs/{id}")
     suspend fun run(@Path("id") id: String): RunEnvelope
+
+    @GET("api/runs/{id}/stats")
+    suspend fun runStats(
+        @Path("id") id: String,
+        @Query("n_trials") nTrials: Int = 1,
+    ): RunStats
 }

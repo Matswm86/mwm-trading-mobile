@@ -9,12 +9,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import no.mwmai.backtest.data.model.RunDto
+import no.mwmai.backtest.data.model.RunStats
 import no.mwmai.backtest.data.repo.PlatformRepository
 
 sealed interface ResultsUiState {
     data class Polling(val status: String) : ResultsUiState
     data class Failed(val message: String) : ResultsUiState
-    data class Ready(val run: RunDto) : ResultsUiState
+    data class Ready(val run: RunDto, val stats: RunStats? = null) : ResultsUiState
 }
 
 class ResultsViewModel(app: Application) : AndroidViewModel(app) {
@@ -34,9 +35,19 @@ class ResultsViewModel(app: Application) : AndroidViewModel(app) {
                 when {
                     job == null -> Unit // transient; retry
                     job.isSuccess -> {
-                        val run = repo.run(job.runId!!).getOrNull()
-                        _state.value = run?.let { ResultsUiState.Ready(it) }
-                            ?: ResultsUiState.Failed("Job done but result could not be loaded.")
+                        val runId = job.runId!!
+                        val run = repo.run(runId).getOrNull()
+                        if (run == null) {
+                            _state.value =
+                                ResultsUiState.Failed("Job done but result could not be loaded.")
+                            return@launch
+                        }
+                        _state.value = ResultsUiState.Ready(run) // show P&L immediately
+                        repo.runStats(runId).onSuccess { st ->
+                            (_state.value as? ResultsUiState.Ready)?.let {
+                                _state.value = it.copy(stats = st)
+                            }
+                        }
                         return@launch
                     }
                     job.status == "failed" ->
