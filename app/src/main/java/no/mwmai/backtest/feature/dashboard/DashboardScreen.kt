@@ -1,6 +1,5 @@
 package no.mwmai.backtest.feature.dashboard
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,10 +8,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -34,7 +31,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -45,7 +41,6 @@ import no.mwmai.backtest.data.model.CellDto
 import no.mwmai.backtest.ui.theme.Muted
 import no.mwmai.backtest.ui.theme.Negative
 import no.mwmai.backtest.ui.theme.Positive
-import no.mwmai.backtest.ui.theme.Warn
 import kotlin.math.abs
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -126,20 +121,13 @@ private fun CellCard(c: CellDto) {
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(c.name, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
-                    Text(
-                        listOfNotNull(c.symbol, c.strategy, c.account).joinToString("  •  "),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Muted,
-                    )
-                }
-                HealthDot(c.live?.health)
+            Column {
+                Text(c.name, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
+                Text(
+                    listOfNotNull(c.symbol, c.strategy, c.account).joinToString("  •  "),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Muted,
+                )
             }
 
             Row(
@@ -203,22 +191,6 @@ private fun Metric(label: String, value: String, modifier: Modifier = Modifier, 
             )
         }
     }
-}
-
-@Composable
-private fun HealthDot(health: String?) {
-    val color = when (health?.lowercase()) {
-        "ok", "healthy", "green" -> Positive
-        "warn", "warning", "stale", "yellow" -> Warn
-        null -> Muted
-        else -> Negative
-    }
-    Box(
-        modifier = Modifier
-            .size(12.dp)
-            .clip(CircleShape)
-            .background(color),
-    )
 }
 
 @Composable
