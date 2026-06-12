@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">MWM Backtest</string>
+    <string name="fleet_widget_label">MWM Fleet heartbeat</string>
+    <string name="fleet_widget_description">Live health of the trading fleet: funded + practice accounts, market-hours aware.</string>
 </resources>
