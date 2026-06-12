@@ -144,7 +144,7 @@ private fun FleetCard(fleet: FleetSummary) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            Text("FLEET · TODAY", style = MaterialTheme.typography.labelMedium, color = Muted)
+            Text("FLEET", style = MaterialTheme.typography.labelMedium, color = Muted)
             fleet.generatedAt?.let {
                 Text(
                     "updated ${localTime(it)}",
@@ -154,14 +154,14 @@ private fun FleetCard(fleet: FleetSummary) {
             }
         }
         Text(
-            fleet.todayPnl?.let { money(it) } ?: "—",
+            "${fleet.nCells} cells",
             style = MaterialTheme.typography.headlineMedium,
-            fontFamily = FontFamily.Monospace,
-            color = pnlColor(fleet.todayPnl) ?: MaterialTheme.colorScheme.onBackground,
+            color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(top = 6.dp),
         )
         Text(
-            "${fleet.nCells} cells · ${fleet.nLiveMoneyCells} on live money",
+            "${fleet.nLiveMoneyCells} on live accounts · " +
+                "${fleet.nCells - fleet.nLiveMoneyCells} on practice",
             style = MaterialTheme.typography.bodySmall,
             color = Muted,
             modifier = Modifier.padding(top = 4.dp),
@@ -195,14 +195,12 @@ private fun AccountHeader(g: AccountGroup) {
             color = if (g.isLiveMoney) Positive else Muted,
         )
         Spacer(Modifier.weight(1f))
-        g.todayPnl?.let {
-            Text(
-                money(it),
-                style = MaterialTheme.typography.labelMedium,
-                fontFamily = FontFamily.Monospace,
-                color = pnlColor(it) ?: Muted,
-            )
-        }
+        Text(
+            "${g.cells.size}",
+            style = MaterialTheme.typography.labelMedium,
+            fontFamily = FontFamily.Monospace,
+            color = Muted,
+        )
     }
 }
 
@@ -248,7 +246,6 @@ private fun CellCard(c: CellDto) {
                     color = Muted,
                 )
             }
-            c.live?.todayPnl?.let { TodayPill(it) }
         }
 
         val spark = c.backtest?.equityCurve?.mapNotNull { it.equity }.orEmpty()
@@ -309,20 +306,6 @@ private fun SymbolChip(symbol: String?) {
             symbol ?: "?",
             style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.Bold,
-            color = color,
-        )
-    }
-}
-
-@Composable
-private fun TodayPill(pnl: Double) {
-    val color = pnlColor(pnl) ?: Muted
-    Column(horizontalAlignment = Alignment.End) {
-        Text("TODAY", style = MaterialTheme.typography.labelSmall, color = Muted)
-        Text(
-            money(pnl),
-            style = MaterialTheme.typography.labelMedium,
-            fontFamily = FontFamily.Monospace,
             color = color,
         )
     }

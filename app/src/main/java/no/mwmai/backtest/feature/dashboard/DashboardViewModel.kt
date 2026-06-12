@@ -11,22 +11,19 @@ import no.mwmai.backtest.data.model.CellDto
 import no.mwmai.backtest.data.model.ObservabilityResponse
 import no.mwmai.backtest.data.repo.PlatformRepository
 
-/** Cells grouped under the account they run on, in API account order. */
+/** Cells grouped under the account they run on, in API account order.
+ *  Backtest data only — live balances / daily P&L deliberately not surfaced. */
 data class AccountGroup(
     val accountId: String,
     val label: String,
     val isLiveMoney: Boolean,
     val note: String?,
     val cells: List<CellDto>,
-) {
-    val todayPnl: Double? =
-        cells.mapNotNull { it.live?.todayPnl }.takeIf { it.isNotEmpty() }?.sum()
-}
+)
 
 data class FleetSummary(
     val nCells: Int,
     val nLiveMoneyCells: Int,
-    val todayPnl: Double?,
     val generatedAt: String?,
 )
 
@@ -81,11 +78,9 @@ class DashboardViewModel(
 
     private fun fleet(resp: ObservabilityResponse): FleetSummary {
         val liveIds = resp.accounts.filter { it.money == "live" }.map { it.id }.toSet()
-        val pnls = resp.cells.mapNotNull { it.live?.todayPnl }
         return FleetSummary(
             nCells = resp.cells.size,
             nLiveMoneyCells = resp.cells.count { it.account in liveIds },
-            todayPnl = pnls.takeIf { it.isNotEmpty() }?.sum(),
             generatedAt = resp.generatedAt,
         )
     }
