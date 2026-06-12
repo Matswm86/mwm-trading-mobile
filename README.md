@@ -37,6 +37,13 @@ login to download artifacts).
   trade-outcome histogram, win/loss anatomy, exit-reason breakdown, and the 3D
   weekday × time-of-day P&L terrain (drag to rotate). Full quant stats
   (Deflated Sharpe, CPCV, bootstrap CIs) at the bottom.
+- **Fleet heartbeat widget** (v0.3.0) — home-screen widget showing live health
+  per account group (ok/total + status dot), market state (CME-hours aware, so
+  a closed market never reads as a fault), and feed freshness. Backed by a tiny
+  static JSON the server regenerates every 60s; the widget polls it every
+  15 min (~2 KB) and tap = instant refresh. Goes grey/STALE if the feed itself
+  stops. Display-only and battery-free by design — push alerting is handled
+  server-side via [ntfy](https://ntfy.sh).
 
 ## Architecture
 
