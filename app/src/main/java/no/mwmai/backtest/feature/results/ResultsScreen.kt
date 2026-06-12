@@ -1,5 +1,7 @@
 package no.mwmai.backtest.feature.results
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,6 +38,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import no.mwmai.backtest.data.model.RunDto
 import no.mwmai.backtest.ui.theme.Muted
 import no.mwmai.backtest.ui.theme.Negative
+import no.mwmai.backtest.ui.theme.OutlineSoft
 import no.mwmai.backtest.ui.theme.Positive
 import kotlin.math.abs
 
@@ -50,6 +53,7 @@ fun ResultsScreen(
     val s by viewModel.state.collectAsStateWithLifecycle()
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = { Text("Results", fontWeight = FontWeight.SemiBold) },
@@ -59,8 +63,8 @@ fun ResultsScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground,
                 ),
             )
         },
@@ -99,7 +103,7 @@ private fun ResultBody(run: RunDto, stats: no.mwmai.backtest.data.model.RunStats
     ) {
         Text(
             listOfNotNull(run.strategy, run.symbol, run.timeframe).joinToString("  •  "),
-            fontWeight = FontWeight.SemiBold,
+            style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onSurface,
         )
         Text(
@@ -108,7 +112,15 @@ private fun ResultBody(run: RunDto, stats: no.mwmai.backtest.data.model.RunStats
             color = Muted,
         )
 
-        EquityChart(run.equityCurve)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(1.dp, OutlineSoft, RoundedCornerShape(18.dp))
+                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(18.dp))
+                .padding(12.dp),
+        ) {
+            EquityChart(run.equityCurve)
+        }
 
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Tile("NET P&L", money(run.netPnl), pnlColor(run.netPnl))
@@ -129,7 +141,10 @@ private fun ResultBody(run: RunDto, stats: no.mwmai.backtest.data.model.RunStats
 
 @Composable
 private fun Tile(label: String, value: String, valueColor: Color? = null) {
-    Surface(shape = RoundedCornerShape(10.dp), color = MaterialTheme.colorScheme.surfaceVariant) {
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
+    ) {
         Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)) {
             Text(label, style = MaterialTheme.typography.labelSmall, color = Muted)
             Text(

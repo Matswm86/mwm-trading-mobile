@@ -1,10 +1,12 @@
 package no.mwmai.backtest.feature.run
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -22,6 +24,7 @@ import kotlinx.serialization.json.JsonElement
 import no.mwmai.backtest.data.model.ParamSpec
 import no.mwmai.backtest.data.model.ParamSpecResponse
 import no.mwmai.backtest.ui.theme.Muted
+import no.mwmai.backtest.ui.theme.OutlineSoft
 import no.mwmai.backtest.ui.theme.Warn
 
 /**
@@ -35,6 +38,8 @@ fun ParamDefaultsSection(ps: ParamSpecResponse) {
     var expanded by remember { mutableStateOf(false) }
     Card(
         modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        border = BorderStroke(1.dp, OutlineSoft),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
     ) {
         Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {

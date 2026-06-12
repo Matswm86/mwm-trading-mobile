@@ -11,6 +11,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class ObservabilityResponse(
+    @SerialName("generated_at") val generatedAt: String? = null,
     val accounts: List<AccountDto> = emptyList(),
     val cells: List<CellDto> = emptyList(),
 )

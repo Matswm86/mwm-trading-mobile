@@ -1,5 +1,6 @@
 package no.mwmai.backtest.feature.results
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,6 +22,7 @@ import no.mwmai.backtest.data.model.RunStats
 import no.mwmai.backtest.data.model.StandardStats
 import no.mwmai.backtest.ui.theme.Muted
 import no.mwmai.backtest.ui.theme.Negative
+import no.mwmai.backtest.ui.theme.OutlineSoft
 import no.mwmai.backtest.ui.theme.Positive
 import no.mwmai.backtest.ui.theme.Warn
 import kotlin.math.abs
@@ -94,10 +96,11 @@ private fun AdvancedCard(a: AdvancedStats, coverageDays: Int) {
 private fun StatCard(title: String, content: @Composable () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp),
+        shape = RoundedCornerShape(18.dp),
+        border = BorderStroke(1.dp, OutlineSoft),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
     ) {
-        Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(7.dp)) {
             Text(
                 title.uppercase(),
                 style = MaterialTheme.typography.labelMedium,
