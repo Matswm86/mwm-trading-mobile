@@ -54,6 +54,15 @@ data class BacktestDto(
     @SerialName("coverage_days") val coverageDays: Int? = null,
     @SerialName("short_coverage") val shortCoverage: Boolean? = null,
     @SerialName("data_window") val dataWindow: DataWindowDto? = null,
+    // Daily account-equity points; element types confirmed against the live
+    // payload 2026-06-12 (t = ISO string, equity = float).
+    @SerialName("equity_curve") val equityCurve: List<EquityPointDto> = emptyList(),
+)
+
+@Serializable
+data class EquityPointDto(
+    val t: String? = null,
+    val equity: Double? = null,
 )
 
 @Serializable

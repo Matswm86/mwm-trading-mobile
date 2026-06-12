@@ -1,5 +1,6 @@
 package no.mwmai.backtest.feature.dashboard
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -35,7 +36,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -246,6 +251,16 @@ private fun CellCard(c: CellDto) {
             c.live?.todayPnl?.let { TodayPill(it) }
         }
 
+        val spark = c.backtest?.equityCurve?.mapNotNull { it.equity }.orEmpty()
+        if (spark.size >= 2) {
+            Sparkline(
+                spark,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 12.dp),
+            )
+        }
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -381,6 +396,38 @@ private fun Metric(label: String, value: String, modifier: Modifier = Modifier, 
                 color = valueColor ?: MaterialTheme.colorScheme.onSurface,
             )
         }
+    }
+}
+
+/** One-year equity sparkline with a soft fill, colored by direction. */
+@Composable
+private fun Sparkline(values: List<Double>, modifier: Modifier = Modifier) {
+    val min = values.min()
+    val max = values.max()
+    val span = (max - min).takeIf { it > 0 } ?: 1.0
+    val color = if (values.last() >= values.first()) Positive else Negative
+    Canvas(modifier = modifier.height(34.dp)) {
+        val w = size.width
+        val h = size.height
+        val line = Path()
+        values.forEachIndexed { i, v ->
+            val x = w * i / (values.size - 1)
+            val y = h - (((v - min) / span) * h).toFloat()
+            if (i == 0) line.moveTo(x, y) else line.lineTo(x, y)
+        }
+        val fill = Path().apply {
+            addPath(line)
+            lineTo(w, h)
+            lineTo(0f, h)
+            close()
+        }
+        drawPath(
+            fill,
+            brush = Brush.verticalGradient(
+                listOf(color.copy(alpha = 0.22f), color.copy(alpha = 0.0f)),
+            ),
+        )
+        drawPath(line, color = color, style = Stroke(width = 2.5f, cap = StrokeCap.Round))
     }
 }
 

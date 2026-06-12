@@ -14,6 +14,7 @@ import no.mwmai.backtest.data.model.RunDto
 import no.mwmai.backtest.data.model.RunStats
 import no.mwmai.backtest.data.model.SubmitJobRequest
 import no.mwmai.backtest.data.model.SubmitJobResponse
+import no.mwmai.backtest.data.model.TradeDto
 
 class PlatformRepository(
     private val api: PlatformApi = NetworkModule.api,
@@ -38,6 +39,8 @@ class PlatformRepository(
     suspend fun run(id: String): Result<RunDto> = io { api.run(id).run }
 
     suspend fun runStats(id: String): Result<RunStats> = io { api.runStats(id) }
+
+    suspend fun runTrades(id: String): Result<List<TradeDto>> = io { api.runTrades(id).trades }
 
     private suspend fun <T> io(block: suspend () -> T): Result<T> =
         withContext(Dispatchers.IO) {

@@ -9,6 +9,7 @@ import no.mwmai.backtest.data.model.RunEnvelope
 import no.mwmai.backtest.data.model.RunStats
 import no.mwmai.backtest.data.model.SubmitJobRequest
 import no.mwmai.backtest.data.model.SubmitJobResponse
+import no.mwmai.backtest.data.model.TradesResponse
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -52,4 +53,7 @@ interface PlatformApi {
         @Path("id") id: String,
         @Query("n_trials") nTrials: Int = 1,
     ): RunStats
+
+    @GET("api/runs/{id}/trades")
+    suspend fun runTrades(@Path("id") id: String): TradesResponse
 }

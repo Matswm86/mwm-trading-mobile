@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import no.mwmai.backtest.data.model.RunDto
+import no.mwmai.backtest.data.model.TradeDto
 import no.mwmai.backtest.ui.theme.Muted
 import no.mwmai.backtest.ui.theme.Negative
 import no.mwmai.backtest.ui.theme.OutlineSoft
@@ -85,7 +86,7 @@ fun ResultsScreen(
                     )
                 }
                 is ResultsUiState.Failed -> Text(st.message, color = Negative, modifier = Modifier.padding(24.dp))
-                is ResultsUiState.Ready -> ResultBody(st.run, st.stats)
+                is ResultsUiState.Ready -> ResultBody(st.run, st.stats, st.trades)
             }
         }
     }
@@ -93,7 +94,11 @@ fun ResultsScreen(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun ResultBody(run: RunDto, stats: no.mwmai.backtest.data.model.RunStats?) {
+private fun ResultBody(
+    run: RunDto,
+    stats: no.mwmai.backtest.data.model.RunStats?,
+    trades: List<TradeDto>?,
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -112,15 +117,19 @@ private fun ResultBody(run: RunDto, stats: no.mwmai.backtest.data.model.RunStats
             color = Muted,
         )
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .border(1.dp, OutlineSoft, RoundedCornerShape(18.dp))
-                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(18.dp))
-                .padding(12.dp),
-        ) {
-            EquityChart(run.equityCurve)
-        }
+        VerdictCard(run, stats)
+
+        ChartSection(
+            "Equity curve",
+            "The account balance after each trade. Up and to the right is what you want; " +
+                "flat stretches are normal.",
+        ) { EquityChart(run.equityCurve) }
+
+        ChartSection(
+            "Drawdown",
+            "How far below its best the account was at any point. Shallow, short dips are " +
+                "healthy — deep valleys are the painful periods.",
+        ) { DrawdownChart(run.equityCurve) }
 
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Tile("NET P&L", money(run.netPnl), pnlColor(run.netPnl))
@@ -129,6 +138,42 @@ private fun ResultBody(run: RunDto, stats: no.mwmai.backtest.data.model.RunStats
             Tile("MAX DD", money(-maxDrawdown(run.equityCurve)), Negative)
             Tile("GROSS", money(run.grossPnl))
             Tile("FEES", money(run.commissions?.let { -abs(it) }))
+        }
+
+        if (trades != null) {
+            ChartSection(
+                "P&L terrain · weekday × time (ET)",
+                "When the strategy earns. Tall green towers are profitable pockets of the " +
+                    "week; red ones bleed. Drag to rotate.",
+            ) { Pnl3DTerrain(trades) }
+        }
+
+        val pnls = trades?.mapNotNull { it.pnlUsd }
+            ?: run.equityCurve.zipWithNext { a, b -> b - a }
+        if (pnls.size >= 3) {
+            ChartSection(
+                "Trade outcomes",
+                "Each bar counts trades by profit or loss. Healthy strategies pile up green " +
+                    "and keep the red bars close to zero.",
+            ) { PnlHistogram(pnls) }
+        }
+
+        stats?.standard?.takeIf { it.available }?.let { std ->
+            if (std.winRate != null && std.avgWin != null && std.avgLoss != null) {
+                ChartSection(
+                    "Win/loss anatomy",
+                    "Winning often means little if losses are bigger. Compare how often it " +
+                        "wins with how big wins and losses typically are.",
+                ) { WinLossVisual(std.winRate, std.avgWin, std.avgLoss) }
+            }
+        }
+
+        if (!trades.isNullOrEmpty()) {
+            ChartSection(
+                "How trades ended",
+                "TP = hit the profit target, SL = stopped out at the loss limit, EOD = " +
+                    "closed at end of day.",
+            ) { ExitReasonChips(trades) }
         }
 
         if (stats == null) {

@@ -7,15 +7,21 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import no.mwmai.backtest.data.model.RunDto
 import no.mwmai.backtest.data.model.RunStats
+import no.mwmai.backtest.data.model.TradeDto
 import no.mwmai.backtest.data.repo.PlatformRepository
 
 sealed interface ResultsUiState {
     data class Polling(val status: String) : ResultsUiState
     data class Failed(val message: String) : ResultsUiState
-    data class Ready(val run: RunDto, val stats: RunStats? = null) : ResultsUiState
+    data class Ready(
+        val run: RunDto,
+        val stats: RunStats? = null,
+        val trades: List<TradeDto>? = null,
+    ) : ResultsUiState
 }
 
 class ResultsViewModel(app: Application) : AndroidViewModel(app) {
@@ -43,9 +49,14 @@ class ResultsViewModel(app: Application) : AndroidViewModel(app) {
                             return@launch
                         }
                         _state.value = ResultsUiState.Ready(run) // show P&L immediately
-                        repo.runStats(runId).onSuccess { st ->
-                            (_state.value as? ResultsUiState.Ready)?.let {
-                                _state.value = it.copy(stats = st)
+                        launch {
+                            repo.runStats(runId).onSuccess { st ->
+                                _state.update { s -> if (s is ResultsUiState.Ready) s.copy(stats = st) else s }
+                            }
+                        }
+                        launch {
+                            repo.runTrades(runId).onSuccess { tr ->
+                                _state.update { s -> if (s is ResultsUiState.Ready) s.copy(trades = tr) else s }
                             }
                         }
                         return@launch
