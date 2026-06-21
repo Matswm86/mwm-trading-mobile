@@ -11,8 +11,7 @@ strategy earns. Backtest data only: no live balances or daily P&L.
 
 *Sample output: the platform's nightly 1-year backtest of the LiqSweep v10
 MNQ cell (the same engine the live runner uses, refreshed every night).
-Fills are simulated touch-fills on CFD-proxy data — optimistic vs. live
-broker fills, so read the numbers as an upper bound.*
+
 
 ## 📲 Download
 
