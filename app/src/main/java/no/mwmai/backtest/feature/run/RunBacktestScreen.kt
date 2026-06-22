@@ -24,7 +24,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -37,7 +36,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -142,19 +140,20 @@ fun RunBacktestScreen(
                 )
             }
 
-            Field("Contracts (optional)") {
-                OutlinedTextField(
-                    value = s.contracts,
-                    onValueChange = viewModel::setContracts,
-                    singleLine = true,
-                    placeholder = { Text("strategy default") },
-                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.fillMaxWidth(),
+            Field("Contracts") {
+                ChipRow(
+                    options = listOf("Default") + (1..20).map(Int::toString),
+                    selected = s.contracts.ifBlank { "Default" },
+                    onSelect = { v -> viewModel.setContracts(if (v == "Default") "" else v) },
                 )
             }
 
             s.paramSpec?.let { ps ->
-                ParamDefaultsSection(ps)
+                ParamOverridesSection(
+                    ps = ps,
+                    overrides = s.overrides,
+                    onOverride = viewModel::setOverride,
+                )
             }
 
             s.error?.let { Text(it, color = Negative) }

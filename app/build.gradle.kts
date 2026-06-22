@@ -13,8 +13,8 @@ android {
         applicationId = "no.mwmai.backtest"
         minSdk = 26
         targetSdk = 35
-        versionCode = 3
-        versionName = "0.2.1"
+        versionCode = 4
+        versionName = "0.4.0"
 
         // The platform API base. Reads are public; the one mutating call
         // (POST /api/jobs) is gated by Caddy basic-auth (set in Settings).

@@ -2,6 +2,7 @@ package no.mwmai.backtest.data.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
 
 // --- submit (POST /api/jobs) ----------------------------------------------
 
@@ -24,8 +25,11 @@ data class CellSpec(
     val strategy: String,
     val symbol: String,
     val timeframe: String,
-    // Optional: only field beyond the three the worker honours on ad-hoc cells.
     val contracts: Int? = null,
+    // Optional per-parameter overrides (the strategy's PARAM_SPEC keys —
+    // stop/target/atr/etc.). Validated server-side against the spec; null
+    // when the user tunes nothing, so a plain run is byte-identical to before.
+    val params: Map<String, JsonElement>? = null,
 )
 
 @Serializable

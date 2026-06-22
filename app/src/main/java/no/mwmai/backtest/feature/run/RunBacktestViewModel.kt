@@ -19,6 +19,7 @@ import no.mwmai.backtest.data.model.PickerStrategy
 import no.mwmai.backtest.data.model.SubmitJobRequest
 import no.mwmai.backtest.data.repo.PlatformRepository
 import no.mwmai.backtest.work.BacktestPollWorker
+import kotlinx.serialization.json.JsonElement
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -40,6 +41,8 @@ data class RunUiState(
     val dataRange: DataRange? = null,
     val loadingRange: Boolean = false,
     val paramSpec: ParamSpecResponse? = null,
+    // User-tuned parameter overrides (strategy PARAM_SPEC keys -> typed value).
+    val overrides: Map<String, JsonElement> = emptyMap(),
     val error: String? = null,
     val submitting: Boolean = false,
     // Set when the job is queued: navigate to results/{jobId}.
@@ -72,11 +75,23 @@ class RunBacktestViewModel(app: Application) : AndroidViewModel(app) {
 
     fun selectStrategy(s: PickerStrategy) {
         val tf = s.timeframes.firstOrNull()
-        _state.update { it.copy(selectedStrategy = s, timeframe = tf, paramSpec = null) }
+        // Overrides are strategy-specific — clear them when the strategy changes.
+        _state.update {
+            it.copy(selectedStrategy = s, timeframe = tf, paramSpec = null, overrides = emptyMap())
+        }
         viewModelScope.launch {
             repo.paramSpec(s.key).onSuccess { ps -> _state.update { it.copy(paramSpec = ps) } }
         }
         refreshRange()
+    }
+
+    /** Set (or clear, when [value] is null) a single parameter override. */
+    fun setOverride(name: String, value: JsonElement?) {
+        _state.update {
+            val next = it.overrides.toMutableMap()
+            if (value == null) next.remove(name) else next[name] = value
+            it.copy(overrides = next)
+        }
     }
 
     fun selectTimeframe(tf: String) {
@@ -121,6 +136,7 @@ class RunBacktestViewModel(app: Application) : AndroidViewModel(app) {
                     symbol = sym,
                     timeframe = tf,
                     contracts = s.contracts.toIntOrNull()?.takeIf { it > 0 },
+                    params = s.overrides.takeIf { it.isNotEmpty() },
                 ),
                 start = start,
                 end = end,
